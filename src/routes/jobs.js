@@ -22,67 +22,42 @@ router.get('/:complaintId', async (req, res) => {
   const job = await Job.findOne({ complaintId: req.params.complaintId }).populate('assignedTo', 'username name');
   if (!job)
      return res.status(404).json({ message: 'job not found' });
-  if (String(job.assignedTo?._id) !== req.user.id && req.user.role !== 'admin') 
-    return res.status(403).json({ message: 'not permitted' });
 
   const jobObj = job.toObject();
   if (jobObj.otp) delete jobObj.otp.hash;
   res.json(jobObj);
 });
 
-// accept job
 router.post('/:complaintId/accept', async (req, res) => {
+  const { otp } = req.body;
   const job = await Job.findOne({ complaintId: req.params.complaintId });
   if (!job) return res.status(404).json({ message: 'job not found' });
-  if (String(job.assignedTo) !== req.user.id) return res.status(403).json({ message: 'not assigned to you' });
+  if (!job.otp?.hash) return res.status(400).json({ message: 'otp not requested' });
+
+  const valid = await verifyOtp(otp, job.otp.hash);
+  if (!valid) return res.status(400).json({ message: 'invalid otp' });
+  
+  job.assignedTo = req.user.id;
   job.status = 'in_progress';
+  job.otp = undefined;
   await job.save();
+
   res.json({ message: 'accepted' });
 });
 
+router.post('/:complaintId/request-otp', async (req, res) => {
+  const job = await Job.findOne({ complaintId: req.params.complaintId });
+  if (!job) return res.status(404).json({ message: 'job not found' });
 
-router.post('/:complaintId/')
+  const otp = generateOtp(6);
+  const hash = await hashOtp(otp);
 
-// // generate OTP (5 minutes expiry)
-// router.post('/:complaintId/generate-otp', async (req, res) => {
-//   const job = await Job.findOne({ complaintId: req.params.complaintId }).populate('assignedTo', 'username name');
-//   if (!job) return res.status(404).json({ message: 'job not found' });
-//   if (String(job.assignedTo?._id) !== req.user.id && req.user.role !== 'admin') return res.status(403).json({ message: 'not permitted' });
+  job.otp = { hash, ts: Date.now() };
+  await job.save();
 
-//   const otp = generateOtp();
-//   const otpHash = await hashOtp(otp);
-//   job.otp = {
-//     hash: otpHash,
-//     expiresAt: new Date(Date.now() + 5 * 60 * 1000),
-//     verified: false
-//   };
-//   await job.save();
-
-//   const vendorContact = req.body.contact || job.assignedTo?.username || 'unknown';
-//   await sendOtp(vendorContact, `OTP for ${job.complaintId}: ${otp}`);
-
-//   // For dev convenience, optionally return otp (DO NOT use in production)
-//   if (process.env.SHOW_OTP === 'true') return res.json({ message: 'otp_sent', otp });
-
-//   res.json({ message: 'otp_sent' });
-// });
-
-// // verify OTP
-// router.post('/:complaintId/verify-otp', async (req, res) => {
-//   const { otp } = req.body;
-//   if (!otp) return res.status(400).json({ message: 'otp required' });
-
-//   const job = await Job.findOne({ complaintId: req.params.complaintId });
-//   if (!job || !job.otp?.hash) return res.status(400).json({ message: 'no otp generated' });
-//   if (job.otp.expiresAt < new Date()) return res.status(400).json({ message: 'otp expired' });
-
-//   const ok = await verifyOtp(otp, job.otp.hash);
-//   if (!ok) return res.status(400).json({ message: 'invalid otp' });
-
-//   job.otp.verified = true;
-//   await job.save();
-//   res.json({ message: 'otp_verified' });
-// });
+  await sendOtp(req.user.phone, otp);
+  res.json({ message: 'otp_sent' });
+});
 
 // submit safety checklist
 router.post('/:complaintId/checklist', async (req, res) => {
