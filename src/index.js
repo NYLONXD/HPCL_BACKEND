@@ -6,6 +6,7 @@ const connectDB = require('./config/db');
 const authRoutes = require('./routes/auth');
 const jobsRoutes = require('./routes/jobs');
 const locationRoutes = require('./routes/location');
+const dealerRouter = require('./routes/dealer.routes');
 // const seedRoutes = require('./routes/seed');
 
 connectDB();
@@ -17,6 +18,8 @@ app.use(express.json());
 app.use('/auth', authRoutes);
 app.use('/jobs', jobsRoutes);
 app.use('/location', locationRoutes);
+app.use("/api/dealer", dealerRouter);
+
 // app.use('/seed', seedRoutes);
 
 app.get('/', (req, res) => res.send('Vendor Module API'));
