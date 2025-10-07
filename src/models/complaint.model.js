@@ -7,7 +7,7 @@ const OtpSub = new mongoose.Schema({
 }, { _id: false });
 
 const JobSchema = new mongoose.Schema({
-  complaintId: { type: String, required: true, unique: true }, // e.g. CMP102
+  complaintId: { type: String, required: true, unique: true }, 
   location: {
     lat: Number,
     lng: Number,
@@ -15,7 +15,7 @@ const JobSchema = new mongoose.Schema({
   },
   issue: String,
   images: [String],
-  status: { type: String, default: 'assigned' }, // assigned, in_progress, completed
+  status: { type: String, default: 'assigned' }, 
   assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   otp: OtpSub,
   meetLink: String,
