@@ -7,11 +7,11 @@ const User = require('../models/user.model');
  */
 exports.signup = async (req, res) => {
   try {
-    const { username, password, name, email } = req.body;
+    const { username, password, name, email, role } = req.body;
     if (!username || !password) 
       return res.status(400).json({ message: 'username & password required' });
     
-    const user = await User.create({ username, passwordHash: password, name, email });
+    const user = await User.create({ username, passwordHash: password, name, email, role });
     return res.json({ message: 'ok', user: user.safe() });
   } catch (err) {
     if (err.code === 11000) 
