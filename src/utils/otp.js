@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 const OTP_LENGTH_DEFAULT = 6;
 const SALT_ROUNDS = 10;
