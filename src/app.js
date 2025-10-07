@@ -19,7 +19,6 @@ app.use('/location', locationRoutes);
 app.use('/api/vendor', vendorRoutes);
 app.use("/api/dealer", dealerRouter);
 
-// app.use('/seed', seedRoutes);
 
 app.get('/', (req, res) => res.send('Vendor Module API'));
 
