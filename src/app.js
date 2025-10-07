@@ -3,11 +3,10 @@ const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
 
-const authRoutes = require('./routes/auth');
-const jobsRoutes = require('./routes/vendor.routes');
-const locationRoutes = require('./routes/location');
+const authRoutes = require('./routes/auth.routes');
+const vendorRoutes = require('./routes/vendor.routes');
+const locationRoutes = require('./routes/location.routes');
 const dealerRouter = require('./routes/dealer.routes');
-// const seedRoutes = require('./routes/seed');
 
 connectDB();
 
@@ -16,8 +15,8 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/auth', authRoutes);
-app.use('/jobs', jobsRoutes);
 app.use('/location', locationRoutes);
+app.use('/api/vendor', vendorRoutes);
 app.use("/api/dealer", dealerRouter);
 
 // app.use('/seed', seedRoutes);

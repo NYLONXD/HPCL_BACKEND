@@ -1,6 +1,9 @@
 const express = require("express")
 const dealerfunc = require("../controllers/dealer.controller")
+const auth = require('../middleware/auth.middleware');
+
 const router = express.Router()
+router.use(auth);
 
 router.post("/createComplaint", dealerfunc.createComplaint);
 router.get("/getComplaints", dealerfunc.getComplaints);

@@ -1,7 +1,7 @@
 const express = require('express');
-const Location = require('../models/Location');
+const Location = require('../models/location.model');
 const Job = require('../models/complaint.model');
-const auth = require('../middleware/auth');
+const auth = require('../middleware/auth.middleware');
 
 const router = express.Router();
 router.use(auth);
