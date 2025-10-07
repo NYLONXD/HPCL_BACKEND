@@ -10,9 +10,8 @@ exports.signup = async (req, res) => {
     const { username, password, name, email } = req.body;
     if (!username || !password) 
       return res.status(400).json({ message: 'username & password required' });
-
-    const passwordHash = await bcrypt.hash(password, 10);
-    const user = await User.create({ username, passwordHash, name, email });
+    
+    const user = await User.create({ username, passwordHash: password, name, email });
     return res.json({ message: 'ok', user: user.safe() });
   } catch (err) {
     if (err.code === 11000) 

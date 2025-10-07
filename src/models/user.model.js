@@ -1,3 +1,4 @@
+const bcrypt = require("bcryptjs");
 const mongoose = require("mongoose");
 
 const UserSchema = new mongoose.Schema(
@@ -15,6 +16,18 @@ const UserSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+// UserSchema.methods.hashPassword = function (password) {
+//   const saltRounds = 10;
+//   this.passwordHash = bcrypt.hashSync(password, saltRounds);
+// }
+
+UserSchema.pre("save", async function (next) {
+  if (this.isModified("passwordHash"))
+    this.passwordHash = await bcrypt.hash(this.passwordHash, 10);
+  next();
+});
+
 
 // optional: remove sensitive fields when toJSON
 UserSchema.methods.safe = function () {
