@@ -1,4 +1,4 @@
-const ComplaintModel =  require("../models/Complaint.model")
+const ComplaintModel =  require("../models/complaint.model")
 
 function getFormOptions(req, res){
   const complaintTypeOptions = ComplaintModel.schema.path("complaintType").enumValues;
