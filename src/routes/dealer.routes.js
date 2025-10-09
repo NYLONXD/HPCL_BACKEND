@@ -5,6 +5,7 @@ const auth = require('../middleware/auth.middleware');
 const router = express.Router()
 router.use(auth);
 
+router.get("/getFormOptions", dealerfunc.getFormOptions);
 router.post("/createComplaint", dealerfunc.createComplaint);
 router.get("/getComplaints", dealerfunc.getComplaints);
 router.get("/getComplaintById/:id", dealerfunc.getComplaintById);

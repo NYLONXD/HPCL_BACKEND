@@ -1,34 +1,43 @@
-const mongoose = require('mongoose');
+const mongoose= require("mongoose");
 
-const OtpSub = new mongoose.Schema({
-  hash: String,
-  expiresAt: Date,
-  verified: { type: Boolean, default: false }
-}, { _id: false });
+const ComplaintSchema = new mongoose.Schema({
+  dealer: { type: String, required: true },
 
-const JobSchema = new mongoose.Schema({
-  complaintId: { type: String, required: true, unique: true }, 
-  location: {
-    lat: Number,
-    lng: Number,
-    address: String
+  complaintType: {
+    type: String,
+    enum: ["DU - Mech", "DU - Electronic", "DU - Others", "DT Plus Terminal", "Automation",
+           "Non DU - Electrical", "Non DU - Civil", "Non DU - Others", "VSAT"],
+    required: true,
   },
-  issue: String,
-  images: [String],
-  status: { type: String, default: 'assigned' }, 
-  assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  otp: OtpSub,
-  meetLink: String,
-  checklist: {
-    ppeWorn: Boolean,
-    powerSwitchedOff: Boolean,
-    areaClear: Boolean
+
+  assetDU: {
+    type: String,
+    enum: ["DU - Mech", "DU - Electronic", "DU - Others", "DT Plus Terminal", "Automation",
+           "Non DU - Electrical", "Non DU - Civil", "Non DU - Others", "VSAT"],
+    required: true,
   },
-  lastLocation: {
-    lat: Number,
-    lng: Number,
-    ts: Date
-  }
+
+  model: { type: String },
+
+  isDUDown: { type: Boolean, required: true },
+  isUPSConnected: { type: Boolean, required: true },
+  isPowerLEDGlowing: { type: Boolean, required: true },
+
+  shortDescription: { type: String, maxlength: 250 },
+
+  natureOfComplaint: {
+    type: String,
+    enum: ["Mechanical", "Electrical", "Software", "Other"],
+    required: true,
+  },
+
+  make: { type: String },
+  nozzles: [{ type: String }],
+
+  totalizerReading: { type: Number, required: true },
+  glowingLEDCount: { type: Number, required: true },
+
 }, { timestamps: true });
 
-module.exports = mongoose.model('Job', JobSchema);
+
+module.exports = mongoose.model("Complaint", ComplaintSchema);
