@@ -1,4 +1,4 @@
-const Job = require('../models/complaint.model');
+const ComplaintModel = require('../models/complaint.model');
 const Location = require('../models/location.model');
 const { generateOtp, hashOtp, verifyOtp } = require('../utils/otp');
 const sendOtp = require('../utils/twilio');
@@ -8,7 +8,7 @@ exports.listJobs = async (req, res) => {
   const { status } = req.query;
   const query = { assignedTo: req.user.id };
   if (status) query.status = status;
-  const jobs = await Job.find(query)
+  const jobs = await ComplaintModel.find(query)
     .select('-otp.hash')
     .populate('assignedTo', 'username name');
   res.json(jobs);
@@ -16,7 +16,7 @@ exports.listJobs = async (req, res) => {
 
 // job detail by complaintId
 exports.getJobDetail = async (req, res) => {
-  const job = await Job.findOne({ complaintId: req.params.complaintId })
+  const job = await ComplaintModel.findOne({ complaintId: req.params.complaintId })
     .populate('assignedTo', 'username name');
   if (!job)
     return res.status(404).json({ message: 'job not found' });
@@ -29,7 +29,7 @@ exports.getJobDetail = async (req, res) => {
 // accept a job
 exports.acceptJob = async (req, res) => {
   const { otp } = req.body;
-  const job = await Job.findOne({ complaintId: req.params.complaintId });
+  const job = await ComplaintModel.findOne({ complaintId: req.params.complaintId });
   if (!job) return res.status(404).json({ message: 'job not found' });
   if (!job.otp?.hash) return res.status(400).json({ message: 'otp not requested' });
 
@@ -46,7 +46,7 @@ exports.acceptJob = async (req, res) => {
 
 // request OTP for a job
 exports.requestOtp = async (req, res) => {
-  const job = await Job.findOne({ complaintId: req.params.complaintId });
+  const job = await ComplaintModel.findOne({ complaintId: req.params.complaintId });
   if (!job) return res.status(404).json({ message: 'job not found' });
 
   const otp = generateOtp(6);
@@ -61,7 +61,7 @@ exports.requestOtp = async (req, res) => {
 
 // submit safety checklist
 exports.submitChecklist = async (req, res) => {
-  const job = await Job.findOne({ complaintId: req.params.complaintId });
+  const job = await ComplaintModel.findOne({ complaintId: req.params.complaintId });
   if (!job) return res.status(404).json({ message: 'job not found' });
   if (String(job.assignedTo) !== req.user.id && req.user.role !== 'admin')
     return res.status(403).json({ message: 'not permitted' });
@@ -77,7 +77,7 @@ exports.submitChecklist = async (req, res) => {
 
 // get Google Maps navigation link
 exports.getNavigationLink = async (req, res) => {
-  const job = await Job.findOne({ complaintId: req.params.complaintId });
+  const job = await ComplaintModel.findOne({ complaintId: req.params.complaintId });
   if (!job || !job.location?.lat) return res.status(404).json({ message: 'no location' });
 
   const { lat, lng } = job.location;
@@ -89,13 +89,13 @@ exports.getNavigationLink = async (req, res) => {
 exports.getMeetLink = async (req, res) => {
   const room = `vendor-${req.params.complaintId}-${Date.now().toString(36)}`;
   const meetLink = `https://meet.jit.si/${room}`;
-  await Job.updateOne({ complaintId: req.params.complaintId }, { meetLink });
+  await ComplaintModel.updateOne({ complaintId: req.params.complaintId }, { meetLink });
   res.json({ meetLink });
 };
 
 // get latest saved location
 exports.getLocation = async (req, res) => {
-  const job = await Job.findOne({ complaintId: req.params.complaintId });
+  const job = await ComplaintModel.findOne({ complaintId: req.params.complaintId });
   if (job?.lastLocation?.ts) return res.json(job.lastLocation);
 
   const latest = await Location.findOne({ complaintId: req.params.complaintId }).sort({ ts: -1 });
