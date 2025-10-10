@@ -24,7 +24,7 @@ async function createComplaint(req, res) {
 
 async function getComplaints(req, res) {
   try {
-    const complaints = await ComplaintModel.find();
+    const complaints = await ComplaintModel.find().populate('assignedTo', 'username name');
     res.json(complaints);
   } catch (err) {
     res.status(500).json({ error: err.message });
